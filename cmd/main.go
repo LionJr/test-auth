@@ -11,6 +11,7 @@ import (
 	"test-auth/internal/repositories/postgres"
 	"test-auth/internal/repositories/redis"
 	"test-auth/internal/services/auth"
+	"test-auth/internal/smtp"
 	"test-auth/pkg/token_manager"
 )
 
@@ -75,7 +76,7 @@ func main() {
 		zap.String("log_level", logLevel),
 	)
 
-	//s := sms.NewSms(cfg.Sms, redisClient, tokenManager)
+	newSmtp := smtp.NewSmtp(cfg.SMTP, redisClient, tokenManager)
 
 	application := &app.Application{
 		Config:         cfg,
@@ -83,7 +84,7 @@ func main() {
 		PostgresClient: pgClient,
 		RedisClient:    redisClient,
 		TokenManager:   tokenManager,
-		AuthService:    auth.NewService(cfg, logger, postgres.NewAuthRepository(pgClient), redisClient, tokenManager),
+		AuthService:    auth.NewService(cfg, logger, postgres.NewAuthRepository(pgClient), redisClient, tokenManager, newSmtp),
 	}
 
 	application.Run(ctx)

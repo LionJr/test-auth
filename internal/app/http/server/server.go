@@ -85,7 +85,11 @@ func (s *Server) initHandlers() *gin.Engine {
 		c.String(http.StatusOK, "OK")
 	})
 
-	//api := router.Group("/api")
+	api := router.Group("/api")
+	authRouter := api.Group("/auth")
+	authRouter.POST("/sign-in", s.AuthService.SignInHandler)
+	authRouter.POST("/check-code", s.AuthService.CheckCodeHandler)
+	authRouter.POST("/refresh", s.AuthService.RefreshHandler)
 
 	return router
 }

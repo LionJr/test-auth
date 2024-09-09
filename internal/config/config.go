@@ -10,6 +10,7 @@ type AppConfig struct {
 	Postgres Postgres `mapstructure:"postgres"`
 	Redis    Redis    `mapstructure:"redis"`
 	Token    Token    `mapstructure:"token"`
+	SMTP     SMTP     `mapstructure:"smtp"`
 }
 
 type Postgres struct {
@@ -41,6 +42,13 @@ type Token struct {
 	RefreshSecretKey string        `mapstructure:"refresh_secret_key"`
 	AccessTTL        time.Duration `mapstructure:"access_ttl"`
 	RefreshTTL       time.Duration `mapstructure:"refresh_ttl"`
+}
+
+type SMTP struct {
+	Host     string `mapstructure:"host"`
+	Port     int    `mapstructure:"port"`
+	Username string `mapstructure:"username"`
+	Password string `mapstructure:"password"`
 }
 
 func NewAppConfig(configFile string) (*AppConfig, error) {
