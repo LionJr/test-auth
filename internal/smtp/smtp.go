@@ -58,19 +58,7 @@ func (s *Smtp) SendCode(ctx context.Context, receiver, userId string) error {
 		return err
 	}
 
-	message := gomail.NewMessage()
-	message.SetHeader("From", s.cfg.Username)
-	message.SetHeader("To", receiver)
-	message.SetHeader("Subject", "Your one time password")
-	message.SetBody("text/plain", code)
-
-	auth := smtp.PlainAuth("", s.cfg.Username, s.cfg.Password, s.cfg.Host)
-	dialer := gomail.NewDialer(s.cfg.Host, s.cfg.Port, s.cfg.Username, s.cfg.Password)
-
-	dialer.Auth = auth
-	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: false, ServerName: dialer.Host}
-
-	err = dialer.DialAndSend(message)
+	err = sendMessage(s.cfg.Username, s.cfg.Password, s.cfg.Host, receiver, "Your one time password", code, s.cfg.Port)
 	if err != nil {
 		return err
 	}
@@ -87,4 +75,33 @@ func (s *Smtp) SendCode(ctx context.Context, receiver, userId string) error {
 		return err
 	}
 	return nil
+}
+
+func (s *Smtp) SendNotification(ctx context.Context, receiver, text string) error {
+	return sendMessage(
+		s.cfg.Username, 
+		s.cfg.Password,
+		s.cfg.Host,
+		receiver,
+		"Your IP address was changed",
+		text,
+		s.cfg.Port,
+	)
+}
+
+func sendMessage(username, password, host, receiver, subject, text string, port int) error {
+	message := gomail.NewMessage()
+	message.SetHeader("From", username)
+	message.SetHeader("To", receiver)
+	message.SetHeader("Subject", subject)
+	message.SetBody("text/plain", text)
+
+	auth := smtp.PlainAuth("", username, password, host)
+	dialer := gomail.NewDialer(host, port, username, password)
+
+	dialer.Auth = auth
+	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: false, ServerName: dialer.Host}
+
+	err = dialer.DialAndSend(message)
+	return err
 }

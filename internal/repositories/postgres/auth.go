@@ -54,9 +54,16 @@ func (a *AuthRepository) UpdateTokenHash(ctx context.Context, userId, tokenHash 
 }
 
 func (a *AuthRepository) GetEmailByUserId(ctx context.Context, userId string) (string, error) {
-	return "", nil
+	var email string
+	query := "SELECT email FROM users WHERE id = $1"
+	err := a.db.QueryRowContext(ctx, query, userId).Scan(&email)
+	return email, err
 }
 
 func (a *AuthRepository) CheckRefreshTokenHash(ctx context.Context, userId, tokenHash string) (bool, error) {
-	return false, nil
+	var exists bool
+	query := `SELECT EXISTS (SELECT id 
+                             FROM users WHERE id = $1 AND token_hash = $2)`
+	err := a.db.QueryRow(query, userId, tokenHash).Scan(&exists)
+	return exists, err
 }

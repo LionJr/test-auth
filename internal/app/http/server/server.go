@@ -67,7 +67,6 @@ func (s *Server) Start(ctx context.Context) error {
 }
 
 func (s *Server) initHandlers() *gin.Engine {
-	// Init gin handler
 	router := gin.Default()
 
 	router.Use(cors.New(cors.Config{

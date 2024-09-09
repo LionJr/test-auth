@@ -57,7 +57,7 @@ func (s *Service) RefreshHandler(ctx *gin.Context) {
 		return
 	}
 
-	hasIsValid, err := s.PgRepo.CheckRefreshTokenHash(ctx, accessClaims.UserID, refreshTokenHash)
+	hashIsValid, err := s.PgRepo.CheckRefreshTokenHash(ctx, accessClaims.UserID, refreshTokenHash)
 	if err != nil {
 		s.Logger.Error("auth.RefreshHandler: check refresh token hash", zap.Error(err))
 		sendErrorResponse(ctx, "Internal server error", http.StatusInternalServerError)
@@ -73,7 +73,7 @@ func (s *Service) RefreshHandler(ctx *gin.Context) {
 	ips := strings.Split(ctx.GetHeader("X-Forwarded-For"), ",")
 	userIP := ips[0]
 	if userIP == "" {
-		s.Logger.Error("auth.CheckCodeHandler: empty user ip")
+		s.Logger.Error("auth.RefreshHandler: empty user ip")
 		sendErrorResponse(ctx, "Invalid user ip", http.StatusBadRequest)
 		return
 	}
@@ -82,30 +82,51 @@ func (s *Service) RefreshHandler(ctx *gin.Context) {
 
 	newAccessToken, err := s.tokenManager.NewAccessToken(accessClaims.UserID, tokenId, userIP, s.config.Token.AccessTTL)
 	if err != nil {
-		s.Logger.Error("auth.CheckCodeHandler: create new access token", zap.Error(err))
+		s.Logger.Error("auth.RefreshHandler: create new access token", zap.Error(err))
 		sendErrorResponse(ctx, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	newRefreshToken, err := s.tokenManager.NewRefreshToken(tokenId, userIP, s.config.Token.RefreshTTL)
 	if err != nil {
-		s.Logger.Error("auth.CheckCodeHandler: create new access token", zap.Error(err))
+		s.Logger.Error("auth.RefreshHandler: create new access token", zap.Error(err))
 		sendErrorResponse(ctx, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	email := ""
+	newRefreshTokenHash, err = hashRefreshToken(newRefreshToken)
+	if err != nil {
+		s.Logger.Error("auth.RefreshHandler: hash refresh token failed", zap.Error(err))
+		sendErrorResponse(ctx, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	err = s.PgRepo.UpdateTokenHash(ctx, accessClaims.UserID, newRefreshTokenHash)
+	if err != nil {
+		s.Logger.Error(fmt.Sprintf("auth.RefreshHandler: update refresh token failed, for user id: %s", userId), zap.Error(err))
+		if err.Error() == "user not found" {
+			sendErrorResponse(ctx, "User not found", http.StatusNotFound)
+			return
+		}
+
+		sendErrorResponse(ctx, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	//TODO need to add check err for sql.No rows
 	if accessClaims.IP != userIP {
+		email := ""
 		email, err = s.PgRepo.GetEmailByUserId(ctx, accessClaims.UserID)
 		if err != nil {
-			s.Logger.Error("auth.CheckCodeHandler: get email by user id", zap.Error(err))
+			s.Logger.Error("auth.RefreshHandler: get email by user id", zap.Error(err))
 			sendErrorResponse(ctx, "Internal server error", http.StatusInternalServerError)
 			return
 		}
 
-		err = s.smtp.SendCode(ctx, email, accessClaims.UserID)
+		text := fmt.Sprintf("Previous IP address was - %s, now IP address is - %s", accessClaims.IP, userIP)
+		err = s.smtp.SendNotification(ctx, email, text)
 		if err != nil {
-			s.Logger.Error("auth.CheckCodeHandler: send email notification", zap.Error(err))
+			s.Logger.Error("auth.RefreshHandler: send email notification", zap.Error(err))
 			sendErrorResponse(ctx, "Internal server error", http.StatusInternalServerError)
 			return
 		}
