@@ -1,0 +1,24 @@
+http:
+  domain: "localhost:8080"
+  port: 8080
+  max_header_bytes: 1
+  read_timeout: 10s
+  write_timeout: 10s
+
+postgres:
+  host: 192.168.77.110
+  port: 7432
+  username: postgres
+  dbname: test-auth
+  password: Password12345
+
+redis:
+  addr: "192.168.77.110:6379"
+  password: "Password12345"
+  db: 1
+
+token:
+  access_secret_key: 4_CYuVbsn3w6rdGaOyoFE423xh8xGvWNWWp71QtxsHILm0HS
+  refresh_secret_key: 8CHH8btX1QoJ2QvIJ59KVhw-v-dBO_k9P7aBvRaQq6Wy9x0d
+  access_ttl: "6h"
+  refresh_ttl: "24h"
