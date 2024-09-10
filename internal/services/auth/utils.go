@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"crypto/sha512"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"test-auth/internal/models"
@@ -19,9 +20,19 @@ func sendSuccessResponse(ctx *gin.Context, data interface{}, status int) {
 }
 
 func hashRefreshToken(refreshToken string) (string, error) {
-	hash, err := bcrypt.GenerateFromPassword([]byte(refreshToken), bcrypt.MinCost)
-	if err != nil {
-		return "", err
-	}
-	return string(hash), nil
+	hashedToken := prepareTokenHash(refreshToken)
+	hash, err := bcrypt.GenerateFromPassword(hashedToken, bcrypt.MinCost)
+	return string(hash), err
+}
+
+func verifyRefreshToken(hashedToken, enteredToken string) error {
+	enteredTokenHash := prepareTokenHash(enteredToken)
+	return bcrypt.CompareHashAndPassword([]byte(hashedToken), enteredTokenHash)
+}
+
+func prepareTokenHash(token string) []byte {
+	newHasher := sha512.New()
+	newHasher.Write([]byte(token))
+	tokenHash := newHasher.Sum(nil)
+	return tokenHash
 }

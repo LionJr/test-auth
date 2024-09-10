@@ -1,0 +1,171 @@
+basePath: /api
+definitions:
+  models.CheckCodeRequest:
+    properties:
+      code:
+        type: string
+    required:
+    - code
+    type: object
+  models.CheckCodeResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  models.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  models.RefreshTokenRequest:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  models.RefreshTokenResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  models.SignInRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  models.SignInResponse:
+    properties:
+      message:
+        type: string
+      user_id:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API server for Auth API
+  title: Test task Back-Dev Auth API
+  version: "1.0"
+paths:
+  /auth/check-code:
+    post:
+      consumes:
+      - application/json
+      description: Check code sent to user's email address
+      parameters:
+      - description: check code request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/models.CheckCodeRequest'
+      - description: IP address
+        in: header
+        name: X-Forwarded-For
+        required: true
+        type: string
+      - description: User id
+        in: query
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CheckCodeResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Check code
+      tags:
+      - Auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refresh endpoint for both access and refresh tokens
+      parameters:
+      - description: refresh token pairs request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/models.RefreshTokenRequest'
+      - description: IP address
+        in: header
+        name: X-Forwarded-For
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.RefreshTokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Refresh tokens
+      tags:
+      - Auth
+  /auth/sign-in:
+    post:
+      consumes:
+      - application/json
+      description: Sign in by email address
+      parameters:
+      - description: email address
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/models.SignInRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SignInResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Sign in
+      tags:
+      - Auth
+securityDefinitions:
+  ApiAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -39,7 +39,7 @@ func (a *AuthRepository) UpdateTokenHash(ctx context.Context, userId, tokenHash 
 	var exists bool
 	query := `SELECT EXISTS (SELECT id 
                              FROM users WHERE id = $1)`
-	err := a.db.QueryRow(query, userId).Scan(&exists)
+	err := a.db.QueryRowContext(ctx, query, userId).Scan(&exists)
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func (a *AuthRepository) UpdateTokenHash(ctx context.Context, userId, tokenHash 
 	}
 
 	query = `UPDATE users SET token_hash = $1 WHERE id = $2`
-	_, err = a.db.Exec(query, tokenHash, userId)
+	_, err = a.db.ExecContext(ctx, query, tokenHash, userId)
 	return err
 }
 
@@ -60,10 +60,10 @@ func (a *AuthRepository) GetEmailByUserId(ctx context.Context, userId string) (s
 	return email, err
 }
 
-func (a *AuthRepository) CheckRefreshTokenHash(ctx context.Context, userId, tokenHash string) (bool, error) {
-	var exists bool
-	query := `SELECT EXISTS (SELECT id 
-                             FROM users WHERE id = $1 AND token_hash = $2)`
-	err := a.db.QueryRow(query, userId, tokenHash).Scan(&exists)
-	return exists, err
+func (a *AuthRepository) GetRefreshTokenHashByUserId(ctx context.Context, userId string) (string, error) {
+	var tokenHash string
+	query := "SELECT token_hash FROM users WHERE id = $1"
+	err := a.db.QueryRowContext(ctx, query, userId).Scan(&tokenHash)
+
+	return tokenHash, err
 }

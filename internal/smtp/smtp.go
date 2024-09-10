@@ -79,7 +79,7 @@ func (s *Smtp) SendCode(ctx context.Context, receiver, userId string) error {
 
 func (s *Smtp) SendNotification(ctx context.Context, receiver, text string) error {
 	return sendMessage(
-		s.cfg.Username, 
+		s.cfg.Username,
 		s.cfg.Password,
 		s.cfg.Host,
 		receiver,
@@ -101,7 +101,8 @@ func sendMessage(username, password, host, receiver, subject, text string, port 
 
 	dialer.Auth = auth
 	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: false, ServerName: dialer.Host}
+	dialer.Timeout = 1 * time.Second
 
-	err = dialer.DialAndSend(message)
+	err := dialer.DialAndSend(message)
 	return err
 }

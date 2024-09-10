@@ -9,7 +9,7 @@ import (
 
 // SignInHandler           godoc
 // @Summary                Sign in
-// @Description            Sign in by phone number
+// @Description            Sign in by email address
 // @Tags                   Auth
 // @Accept                 json
 // @Produce                json
@@ -21,21 +21,21 @@ import (
 func (s *Service) SignInHandler(ctx *gin.Context) {
 	var req models.SignInRequest
 	if err := ctx.BindJSON(&req); err != nil {
-		s.Logger.Error("auth.SignInHandler: unmarshal request body", zap.Error(err))
+		s.Logger.Info("auth.SignInHandler: unmarshal request body", zap.Error(err))
 		sendErrorResponse(ctx, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	userId, err := s.PgRepo.GetUserIdByEmail(ctx, req.Email)
 	if err != nil {
-		s.Logger.Error("auth.SignInHandler: get user id from db", zap.Error(err))
+		s.Logger.Info("auth.SignInHandler: get user id from db", zap.Error(err))
 		sendErrorResponse(ctx, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	err = s.smtp.SendCode(ctx, req.Email, userId)
 	if err != nil {
-		s.Logger.Error("auth.SignInHandler: send OTP to user", zap.Error(err))
+		s.Logger.Info("auth.SignInHandler: send OTP to user", zap.Error(err))
 		sendErrorResponse(ctx, "Internal server error", http.StatusInternalServerError)
 		return
 	}

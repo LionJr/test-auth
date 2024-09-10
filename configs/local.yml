@@ -24,7 +24,7 @@ token:
   refresh_ttl: "24h"
 
 smtp:
-  host: "smtp.mail.ru"
-  port: 465
-  username: "jorayev_arslan@bk.ru"
-  password: "aShhtvQraynkT9GeaK5r"
+  host: "smtp.sanly.tm"
+  port: 587
+  username: "juma.jumayew1991@sanly.tm"
+  password: "2tTe.2CgyYd9CiK"

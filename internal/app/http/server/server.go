@@ -13,6 +13,8 @@ import (
 	"test-auth/internal/config"
 	"test-auth/internal/services/auth"
 	"test-auth/pkg/token_manager"
+
+	_ "test-auth/docs"
 )
 
 type Server struct {
