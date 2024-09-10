@@ -1,7 +1,6 @@
 http:
-  domain: "localhost:8080"
+  domain: "192.168.77.110"
   port: 8080
-  max_header_bytes: 1
   read_timeout: 10s
   write_timeout: 10s
 

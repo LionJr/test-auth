@@ -45,16 +45,15 @@ func (s *Server) Start(ctx context.Context) error {
 	h := s.initHandlers()
 
 	server := http.Server{
-		Handler:        h,
-		Addr:           ":" + strconv.Itoa(s.Config.HTTP.Port),
-		MaxHeaderBytes: s.Config.HTTP.MaxHeaderBytes,
-		ReadTimeout:    s.Config.HTTP.ReadTimeout,
-		WriteTimeout:   s.Config.HTTP.WriteTimeout,
+		Handler:      h,
+		Addr:         ":" + strconv.Itoa(s.Config.HTTP.Port),
+		ReadTimeout:  s.Config.HTTP.ReadTimeout,
+		WriteTimeout: s.Config.HTTP.WriteTimeout,
 	}
 
 	s.Logger.Info(
 		"Server running",
-		zap.String("host", s.Config.HTTP.Host),
+		zap.String("domain", s.Config.HTTP.Domain),
 		zap.Int("port", s.Config.HTTP.Port),
 	)
 
@@ -73,7 +72,7 @@ func (s *Server) initHandlers() *gin.Engine {
 
 	router.Use(cors.New(cors.Config{
 		AllowMethods:     []string{"GET, POST, OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "User-Agent", "Referrer", "Host", "Authorization"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "User-Agent", "Referrer", "Host", "X-Forwarded-For"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		AllowOrigins:     []string{"http://localhost:8080"},

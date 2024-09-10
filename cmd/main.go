@@ -24,12 +24,8 @@ const (
 // @version         1.0
 // @description     API server for Auth API
 
-// @host      localhost:8080
+// @host      192.168.77.110:8080
 // @BasePath  /api
-
-// @securityDefinitions.apikey  ApiAuth
-// @in header
-// @name Authorization
 
 func main() {
 	ctx := context.Background()

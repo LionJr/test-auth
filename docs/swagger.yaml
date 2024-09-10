@@ -47,7 +47,7 @@ definitions:
       user_id:
         type: string
     type: object
-host: localhost:8080
+host: 192.168.77.110:8080
 info:
   contact: {}
   description: API server for Auth API
@@ -163,9 +163,4 @@ paths:
       summary: Sign in
       tags:
       - Auth
-securityDefinitions:
-  ApiAuth:
-    in: header
-    name: Authorization
-    type: apiKey
 swagger: "2.0"
